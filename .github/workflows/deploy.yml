@@ -1,0 +1,40 @@
+name: Deploy
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: deploy-main
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Deploy backend
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_HOST: ${{ secrets.SSH_HOST }}
+          SSH_USER: ${{ secrets.SSH_USER }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          printf '%s\n' '74.162.122.198 ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIF40JqVOJj13xMPqiR28CQXwzVexvE4Yhc+u8g6Fl9CT' > ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key \
+            -o IdentitiesOnly=yes \
+            -o UserKnownHostsFile="$HOME/.ssh/known_hosts" \
+            -o StrictHostKeyChecking=yes \
+            "$SSH_USER@$SSH_HOST" bash -s << 'EOF'
+          set -euo pipefail
+          export PATH="/usr/local/bin:$PATH"
+          cd /home/sijl/sijl/Sijl-backend
+          git fetch origin main
+          git reset --hard origin/main
+          npm ci --no-audit --no-fund
+          npm run build
+          sudo systemctl restart sijl-backend
+          EOF
