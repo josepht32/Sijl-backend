@@ -8,6 +8,7 @@ const POST_REVIEW_STATES: WorkflowState[] = [
   WorkflowState.AWAITING_CHAIRMAN,
   WorkflowState.IN_EXECUTION,
   WorkflowState.AWAITING_REPORT,
+  WorkflowState.COMPLETED,
   WorkflowState.ARCHIVED,
 ];
 
@@ -62,7 +63,11 @@ export function canManageConcernedDepartments(params: {
   status: CaseStatus;
   workflowState: WorkflowState;
 }): boolean {
-  if (params.status === CaseStatus.CLOSED || params.workflowState === WorkflowState.ARCHIVED) {
+  if (
+    params.status === CaseStatus.CLOSED ||
+    params.workflowState === WorkflowState.ARCHIVED ||
+    params.workflowState === WorkflowState.COMPLETED
+  ) {
     return false;
   }
   if (
@@ -81,7 +86,11 @@ export function canAddExecutionActivity(params: {
   workflowState: WorkflowState;
   concernedDepartmentIds: string[];
 }): boolean {
-  if (params.status === CaseStatus.CLOSED || params.workflowState === WorkflowState.ARCHIVED) {
+  if (
+    params.status === CaseStatus.CLOSED ||
+    params.workflowState === WorkflowState.ARCHIVED ||
+    params.workflowState === WorkflowState.COMPLETED
+  ) {
     return false;
   }
   if (
@@ -91,6 +100,28 @@ export function canAddExecutionActivity(params: {
     return false;
   }
   if (isAdminRole(params.role)) {
+    return true;
+  }
+  return Boolean(
+    params.departmentId && params.concernedDepartmentIds.includes(params.departmentId),
+  );
+}
+
+export function canCompleteCase(params: {
+  role: string;
+  departmentId: string | null;
+  permissions?: Permission[];
+  status: CaseStatus;
+  workflowState: WorkflowState;
+  concernedDepartmentIds: string[];
+}): boolean {
+  if (params.status === CaseStatus.CLOSED || params.workflowState !== WorkflowState.IN_EXECUTION) {
+    return false;
+  }
+  if (
+    isAdminRole(params.role) ||
+    hasPermission(params.permissions ?? params.role, Permission.CASES_DECIDE)
+  ) {
     return true;
   }
   return Boolean(

@@ -43,6 +43,13 @@ export class CreateActivityDto {
   comment: string;
 }
 
+export class CompleteCaseDto {
+  @IsOptional()
+  @IsString()
+  @MaxLength(8000)
+  note?: string;
+}
+
 export class AssignDepartmentDto {
   @IsUUID()
   departmentId: string;

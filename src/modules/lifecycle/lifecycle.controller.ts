@@ -13,6 +13,7 @@ import { memoryStorage } from 'multer';
 import { LifecycleService } from './lifecycle.service';
 import {
   AssignDepartmentDto,
+  CompleteCaseDto,
   CreateActivityDto,
   CreateDecisionDto,
 } from './dto/lifecycle.dto';
@@ -78,6 +79,16 @@ export class LifecycleController {
   @RequirePermissions(Permission.CASES_READ)
   listActivities(@CurrentUser() user: User, @Param('caseId') caseId: string) {
     return this.lifecycleService.listActivities(user, caseId);
+  }
+
+  @Post('complete')
+  @RequirePermissions(Permission.CASES_READ)
+  complete(
+    @CurrentUser() user: User,
+    @Param('caseId') caseId: string,
+    @Body() dto: CompleteCaseDto,
+  ) {
+    return this.lifecycleService.complete(user, caseId, dto);
   }
 
   @Post('activities')

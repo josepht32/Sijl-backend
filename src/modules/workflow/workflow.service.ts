@@ -97,7 +97,7 @@ export class WorkflowService {
       action: WorkflowActionType.FORWARD,
       fromStage,
       toStage: destination,
-      instruction: dto.instruction.trim(),
+      instruction: dto.instruction?.trim() || null,
       performedById: user.id,
     });
 

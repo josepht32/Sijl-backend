@@ -41,6 +41,7 @@ import {
 import {
   availableDecisionTypes,
   canAddExecutionActivity,
+  canCompleteCase,
   canManageConcernedDepartments,
 } from '../../common/utils/lifecycle';
 import {
@@ -636,12 +637,21 @@ export class CasesService {
     const assignments = await this.concernedRepo.find({
       where: { caseId: caseEntity.id },
     });
+    const concernedDepartmentIds = assignments.map((item) => item.departmentId);
     caseEntity.canAddActivity = canAddExecutionActivity({
       role: user.role,
       departmentId: user.departmentId,
       status: caseEntity.status,
       workflowState: caseEntity.workflowState,
-      concernedDepartmentIds: assignments.map((item) => item.departmentId),
+      concernedDepartmentIds,
+    });
+    caseEntity.canComplete = canCompleteCase({
+      role: user.role,
+      departmentId: user.departmentId,
+      permissions: grantedPermissions(user),
+      status: caseEntity.status,
+      workflowState: caseEntity.workflowState,
+      concernedDepartmentIds,
     });
   }
 }

@@ -37,7 +37,11 @@ export type AttentionReason =
   | 'assigned';
 
 export function isCaseClosed(status: CaseStatus, workflowState: WorkflowState): boolean {
-  return status === CaseStatus.CLOSED || workflowState === WorkflowState.ARCHIVED;
+  return (
+    status === CaseStatus.CLOSED ||
+    workflowState === WorkflowState.ARCHIVED ||
+    workflowState === WorkflowState.COMPLETED
+  );
 }
 
 export function isCaseActive(status: CaseStatus, workflowState: WorkflowState): boolean {

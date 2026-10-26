@@ -2,10 +2,10 @@ import { IsEnum, IsIn, IsOptional, IsString, IsUUID, MaxLength, MinLength } from
 import { ReturnTarget } from '../../../common/enums/workflow.enums';
 
 export class ForwardCaseDto {
+  @IsOptional()
   @IsString()
-  @MinLength(10)
   @MaxLength(8000)
-  instruction: string;
+  instruction?: string;
 }
 
 export class ReturnCaseDto {

@@ -166,6 +166,7 @@ export class Case {
   availableDecisionTypes?: DecisionType[];
   canManageDepartments?: boolean;
   canAddActivity?: boolean;
+  canComplete?: boolean;
   canManageAccess?: boolean;
   canSignDocuments?: boolean;
   nextStage?: WorkflowStage | null;

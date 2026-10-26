@@ -143,6 +143,7 @@ export function serializeCase(caseEntity: Case, includeDocuments = false) {
     availableDecisionTypes: caseEntity.availableDecisionTypes ?? [],
     canManageDepartments: Boolean(caseEntity.canManageDepartments),
     canAddActivity: Boolean(caseEntity.canAddActivity),
+    canComplete: Boolean(caseEntity.canComplete),
     canManageAccess: Boolean(caseEntity.canManageAccess),
     canSignDocuments: Boolean(caseEntity.canSignDocuments),
     nextStage: caseEntity.nextStage,

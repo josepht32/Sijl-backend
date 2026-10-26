@@ -11,6 +11,7 @@ export enum WorkflowState {
   AWAITING_CHAIRMAN = 'awaiting_chairman',
   AWAITING_REPORT = 'awaiting_report',
   IN_EXECUTION = 'in_execution',
+  COMPLETED = 'completed',
   ARCHIVED = 'archived',
 }
 
@@ -20,6 +21,7 @@ export enum WorkflowActionType {
   RETURN = 'return',
   RESUBMIT = 'resubmit',
   DECISION = 'decision',
+  COMPLETE = 'complete',
 }
 
 export enum ReturnTarget {

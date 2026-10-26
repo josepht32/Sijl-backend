@@ -126,6 +126,36 @@ describe('Workflow actions (e2e)', () => {
       .expect(200);
     const actions = history.body.map((item: { action: string }) => item.action);
     expect(actions).toEqual(['created', 'forward', 'forward', 'forward', 'decision']);
+
+    const duringExecution = await http(app)
+      .get(`/api/cases/${created.id}`)
+      .set(auth(tokens.khalid))
+      .expect(200);
+    expect(duringExecution.body.canComplete).toBe(true);
+
+    await http(app)
+      .post(`/api/cases/${created.id}/complete`)
+      .set(auth(tokens.omar))
+      .send({ note: 'The originator cannot close an endorsed case.' })
+      .expect(403);
+
+    await http(app)
+      .post(`/api/cases/${created.id}/activities`)
+      .set(auth(tokens.admin))
+      .send({ comment: 'The concerned department finished the endorsed work.' })
+      .expect(201);
+
+    await http(app)
+      .post(`/api/cases/${created.id}/complete`)
+      .set(auth(tokens.khalid))
+      .send({})
+      .expect(201)
+      .expect((res) => {
+        expect(res.body.workflowState).toBe('completed');
+        expect(res.body.status).toBe('closed');
+        expect(res.body.canComplete).toBe(false);
+        expect(res.body.canAddActivity).toBe(false);
+      });
   });
 
   it('returns a file for completion and accepts a resubmit', async () => {

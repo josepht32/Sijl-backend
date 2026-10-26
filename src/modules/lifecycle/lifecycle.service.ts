@@ -19,6 +19,7 @@ import { AuditService } from '../audit/audit.service';
 import { serializeDocument } from '../cases/serialize-case';
 import {
   AssignDepartmentDto,
+  CompleteCaseDto,
   CreateActivityDto,
   CreateDecisionDto,
 } from './dto/lifecycle.dto';
@@ -26,12 +27,15 @@ import {
   DECISION_DEFINITIONS,
   DecisionType,
 } from '../../common/enums/decision.enums';
+import { CaseStatus } from '../../common/enums/case.enums';
 import {
   WorkflowActionType,
   WorkflowStage,
+  WorkflowState,
 } from '../../common/enums/workflow.enums';
 import {
   canAddExecutionActivity,
+  canCompleteCase,
   canDecide,
   canManageConcernedDepartments,
 } from '../../common/utils/lifecycle';
@@ -251,6 +255,41 @@ export class LifecycleService {
       relations: ['author', 'department', 'documents', 'documents.uploadedBy'],
     });
     return this.serializeActivity(loaded);
+  }
+
+  async complete(user: User, caseId: string, dto: CompleteCaseDto) {
+    const caseEntity = await this.casesService.assertAccessibleEntity(user, caseId);
+    const assignments = await this.concernedRepo.find({ where: { caseId } });
+    if (
+      !canCompleteCase({
+        role: user.role,
+        departmentId: user.departmentId,
+        permissions: user.permissions,
+        status: caseEntity.status,
+        workflowState: caseEntity.workflowState,
+        concernedDepartmentIds: assignments.map((item) => item.departmentId),
+      })
+    ) {
+      throw new ForbiddenException('You are not allowed to complete this case');
+    }
+
+    await this.movementsRepo.save(
+      this.movementsRepo.create({
+        caseId,
+        action: WorkflowActionType.COMPLETE,
+        fromStage: caseEntity.currentStage,
+        toStage: caseEntity.currentStage,
+        instruction: dto.note?.trim() || null,
+        performedById: user.id,
+      }),
+    );
+
+    await this.casesService.updateWorkflow(caseId, {
+      workflowState: WorkflowState.COMPLETED,
+      status: CaseStatus.CLOSED,
+    });
+    await this.auditService.log('case.complete', 'case', caseId, user.id, {});
+    return this.casesService.getInOrganization(user, caseId);
   }
 
   private assertCanManageDepartments(user: User, caseEntity: Case) {

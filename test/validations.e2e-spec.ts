@@ -73,16 +73,16 @@ describe('Validations (e2e)', () => {
     const secretariat = (await login(app, ACCOUNTS.secretariat)).token;
 
     await http(app)
-      .post(`/api/cases/${created.id}/forward`)
-      .set(auth(secretariat))
-      .field('instruction', 'too short')
-      .expect(400);
-
-    await http(app)
       .post(`/api/cases/${created.id}/return`)
       .set(auth(secretariat))
       .field('instruction', 'Please supply the missing annexes.')
       .expect(400);
+
+    await http(app)
+      .post(`/api/cases/${created.id}/forward`)
+      .set(auth(secretariat))
+      .field('instruction', 'too short')
+      .expect(201);
   });
 
   it('validates catalog and people payloads', async () => {
