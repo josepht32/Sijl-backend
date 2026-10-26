@@ -183,7 +183,7 @@ export class DemoDatasetSeeder {
           nameEn: 'Retired classification',
           nameAr: 'تصنيف متوقف',
           descriptionEn: 'Kept for history; not used for new cases',
-          descriptionAr: 'يُحفظ للسجل التاريخي ولا يُستخدم للمعاملات الجديدة',
+          descriptionAr: 'يُحفظ للسجل التاريخي ولا يُستخدم للمراسلات الجديدة',
           targetTimelineDays: 5,
           retentionPeriodYears: 5,
           organizationId,
